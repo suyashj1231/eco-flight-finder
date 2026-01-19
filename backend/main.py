@@ -174,3 +174,5 @@ def search_flights(from_iata: str, to_iata: str, date: Optional[str] = None):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+print(1)
