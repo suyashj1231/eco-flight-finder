@@ -1,0 +1,92 @@
+[
+    {
+        "iata": "LHR",
+        "name": "London Heathrow Airport",
+        "lat": 51.4700,
+        "lon": -0.4543
+    },
+    {
+        "iata": "JFK",
+        "name": "John F. Kennedy International Airport",
+        "lat": 40.6413,
+        "lon": -73.7781
+    },
+    {
+        "iata": "CDG",
+        "name": "Charles de Gaulle Airport",
+        "lat": 49.0097,
+        "lon": 2.5479
+    },
+    {
+        "iata": "DXB",
+        "name": "Dubai International Airport",
+        "lat": 25.2532,
+        "lon": 55.3657
+    },
+    {
+        "iata": "LAX",
+        "name": "Los Angeles International Airport",
+        "lat": 33.9416,
+        "lon": -118.4085
+    },
+    {
+        "iata": "HND",
+        "name": "Tokyo Haneda Airport",
+        "lat": 35.5494,
+        "lon": 139.7798
+    },
+    {
+        "iata": "SYD",
+        "name": "Sydney Kingsford Smith Airport",
+        "lat": -33.9399,
+        "lon": 151.1753
+    },
+    {
+        "iata": "SIN",
+        "name": "Singapore Changi Airport",
+        "lat": 1.3644,
+        "lon": 103.9915
+    },
+    {
+        "iata": "FRA",
+        "name": "Frankfurt Airport",
+        "lat": 50.0379,
+        "lon": 8.5622
+    },
+    {
+        "iata": "AMS",
+        "name": "Amsterdam Airport Schiphol",
+        "lat": 52.3105,
+        "lon": 4.7683
+    },
+    {
+        "iata": "SFO",
+        "name": "San Francisco International Airport",
+        "lat": 37.6188,
+        "lon": -122.3758
+    },
+    {
+        "iata": "ORD",
+        "name": "O'Hare International Airport",
+        "lat": 41.9742,
+        "lon": -87.9073
+    },
+    {
+        "iata": "YYZ",
+        "name": "Toronto Pearson International Airport",
+        "lat": 43.6777,
+        "lon": -79.6248
+    },
+    {
+        "iata": "BOM",
+        "name": "Chhatrapati Shivaji Maharaj International Airport",
+        "lat": 19.0896,
+        "lon": 72.8656
+    },
+    {
+        "iata": "DEL",
+        "name": "Indira Gandhi International Airport",
+        "lat": 28.5562,
+        "lon": 77.1000
+    }
+]
