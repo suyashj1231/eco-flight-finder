@@ -1,5 +1,8 @@
 import sys
 from flight_api import search_flights, format_flight_data
+from fuel_utils import fuel_db
+
+CO2_PER_KG_FUEL = 3.16
 
 def print_flights(flights, label="Flights"):
     """Pretty print a list of flights"""
@@ -8,9 +11,31 @@ def print_flights(flights, label="Flights"):
         print("No flights found.")
         return
 
-    for flight in flights:
+    for i, flight in enumerate(flights):
+        if i == 0: print(f"DEBUG RAW AIRCRAFT: {flight.get('aircraft')}")
         f = format_flight_data(flight)
-        print(f"[{f['date']}] {f['airline']} {f['flight_number']} | {f['dep_airport']} ({f['dep_time']}) -> {f['arr_airport']} ({f['arr_time']}) | Status: {f['status']}")
+        
+        # CO2 Calculation
+        fuel_info = fuel_db.get_aircraft_data(f['aircraft'])
+        emissions_str = "Emissions: N/A"
+        
+        if fuel_info:
+            fuel_kg_km = fuel_info['fuel_kg_km']
+            max_pax = fuel_info['max_pax']
+            
+            # Total CO2 per km for the whole plane
+            co2_kg_km = fuel_kg_km * CO2_PER_KG_FUEL
+            
+            # CO2 per pax per km (assuming full flight)
+            co2_per_pax_km = co2_kg_km / max_pax if max_pax else 0
+            
+            emissions_str = (f"Est. CO2: {co2_kg_km:.2f} kg/km (Total) | "
+                             f"{co2_per_pax_km:.3f} kg/km/pax | "
+                             f"Plane: {fuel_info['name']} (Max Pax: {max_pax})")
+        
+        print(f"[{f['date']}] {f['airline']} {f['flight_number']} ({f['aircraft']}) | "
+              f"{f['dep_airport']} ({f['dep_time']}) -> {f['arr_airport']} ({f['arr_time']}) | "
+              f"Status: {f['status']}\n\t{emissions_str}")
 
 def get_input(prompt):
     """Helper to get user input consistently"""

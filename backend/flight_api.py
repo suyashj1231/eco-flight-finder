@@ -41,10 +41,8 @@ def search_flights(dep_iata, arr_iata, date=None):
         # Note: Future schedules might require a different strategy if 'flights' doesn't return them.
         # But for 'active' flights on a specific day, this is the param.
         # However, for pure future schedules, we might need /flightsFuture, but let's stick to /flights for now
-        # as per initial exploration.
-        # Actually, for the /flights endpoint, 'flight_date' is deprecated/historical primarily.
-        # BUT let's try it.
-        params['flight_date'] = date
+        # params['flight_date'] = date
+        print("Note: Date filtering is restricted on the Free Plan. Searching for active/recent flights instead.")
 
     try:
         response = requests.get(BASE_URL, params=params)
@@ -63,10 +61,11 @@ def search_flights(dep_iata, arr_iata, date=None):
 
 def format_flight_data(flight):
     """Helper to extract relevant info from a flight object"""
-    departure = flight.get('departure', {})
-    arrival = flight.get('arrival', {})
-    airline = flight.get('airline', {})
-    flight_info = flight.get('flight', {})
+    departure = flight.get('departure') or {}
+    arrival = flight.get('arrival') or {}
+    airline = flight.get('airline') or {}
+    flight_info = flight.get('flight') or {}
+    aircraft = flight.get('aircraft') or {}
     
     return {
         'date': flight.get('flight_date'),
@@ -77,5 +76,5 @@ def format_flight_data(flight):
         'dep_time': departure.get('scheduled'),
         'arr_airport': arrival.get('iata'),
         'arr_time': arrival.get('scheduled'),
-        'aircraft': flight.get('aircraft', {}).get('iata') # Valuable for CO2
+        'aircraft': aircraft.get('iata') # Valuable for CO2
     }
