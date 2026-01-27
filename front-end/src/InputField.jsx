@@ -29,6 +29,7 @@ function InputField() {
                 <option value="One way">One Way</option>
                 <option value="Round trip">Round Trip</option>
             </select>
+            <button type="submit" className="submit-button">✈️</button> {/* Flight emoji from ChatGPT */}
         </form>
     );
 }

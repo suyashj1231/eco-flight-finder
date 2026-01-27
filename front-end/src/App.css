@@ -1,0 +1,16 @@
+.page-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    border: 1px solid black;
+}
+
+.my-div {
+    align-items: center;
+    width: 300px;
+    border: 1px solid lightblue;
+    padding: 10px;
+    text-align: center;
+}

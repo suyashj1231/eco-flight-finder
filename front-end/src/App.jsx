@@ -1,12 +1,16 @@
 import InputField from './InputField.jsx';
+import './App.css';
 
 function App() {
 
   return (
-    <>
-      <h1>Eco Flight Finder</h1>
-      <InputField />
-    </>
+    
+    <div className='page-container'>
+      <div className='my-div'>
+        <h1>Enjoy!</h1>
+        <InputField />
+      </div>
+    </div>
   )
 }
 
