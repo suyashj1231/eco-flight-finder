@@ -1,0 +1,8 @@
+.input-form {
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  max-width: 300px;
+  align-items: flex-start;
+  border: 1px solid #c42626;
+}
