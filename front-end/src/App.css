@@ -5,12 +5,18 @@
     align-items: center;
     height: 100vh;
     border: 1px solid black;
+    background-image: url('/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    backdrop-filter: blur(2px);
 }
 
 .my-div {
     align-items: center;
-    width: 300px;
+    width: 500px;
     border: 1px solid lightblue;
     padding: 10px;
     text-align: center;
+    border-radius: 12px;
 }
