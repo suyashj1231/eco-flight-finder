@@ -173,8 +173,9 @@ class FlightRecommender:
         if aircraft_iata and aircraft_iata != "UNK" and distance_km > 0:
             aircraft_data = fuel_db.get_aircraft_data(aircraft_iata)
             if aircraft_data:
-                fuel_kg_per_km = aircraft_data.get("fuel_consumption_kg_km", 0)
-                max_pax = aircraft_data.get("max_passengers", 180)
+                fuel_kg_per_km = aircraft_data.get("fuel_kg_km", 0)
+                max_pax = aircraft_data.get("max_pax", 0)
+
                 co2_per_kg_fuel = 3.16  # kg CO2 per kg jet fuel
                 
                 if fuel_kg_per_km and max_pax:

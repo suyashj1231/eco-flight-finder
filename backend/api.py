@@ -52,7 +52,7 @@ class CreateUserRequest(BaseModel):
 
 
 class SearchRequest(BaseModel):
-    google_id: Optional[str]
+    google_id: Optional[str] = None
     departure_iata: str
     arrival_iata: str
     departure_date: str

@@ -5,7 +5,7 @@ export default function SearchForm({ onSearch }) {
     departure: "SFO",
     arrival: "JFK",
     departure_date: "2026-02-10",
-    return_date: "2026-02-17",
+    return_date: null,
     eco_mode: true,
   });
 
@@ -44,20 +44,13 @@ export default function SearchForm({ onSearch }) {
             style={{ padding: "8px" }}
           />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "15px" }}>
+        <div style={{ marginBottom: "15px" }}>
           <input
             type="date"
             name="departure_date"
             value={form.departure_date}
             onChange={handleChange}
-            style={{ padding: "8px" }}
-          />
-          <input
-            type="date"
-            name="return_date"
-            value={form.return_date}
-            onChange={handleChange}
-            style={{ padding: "8px" }}
+            style={{ padding: "8px", width: "100%", boxSizing: "border-box" }}
           />
         </div>
         <label style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>

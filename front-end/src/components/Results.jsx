@@ -3,6 +3,12 @@ export default function Results({ results }) {
     return <div style={{ padding: "20px" }}>No results yet. Try searching!</div>;
   }
 
+  const formatTime = (isoString) => {
+    if (!isoString) return "N/A";
+    const date = new Date(isoString);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
     <div style={{ padding: "20px", maxWidth: "800px" }}>
       <h2>Recommended Flights</h2>
@@ -25,6 +31,9 @@ export default function Results({ results }) {
                   <strong>Airline:</strong> {item.flight?.airline || "Unknown"}
                 </p>
                 <p style={{ margin: "5px 0" }}>
+                  <strong>Time:</strong> {formatTime(item.flight?.departure)} - {formatTime(item.flight?.arrival)}
+                </p>
+                <p style={{ margin: "5px 0" }}>
                   <strong>Distance:</strong> {item.flight?.distance_km?.toFixed(0) || 0} km
                 </p>
                 <p style={{ margin: "5px 0" }}>
@@ -40,18 +49,10 @@ export default function Results({ results }) {
                     <strong>Filtered:</strong> {item.filter_reason}
                   </p>
                 )}
-                {!item.filtered_out && (
-                  <p style={{ color: "green", marginTop: "10px" }}>
-                    Score: {item.rank_score?.toFixed(3) || 0} (lower is better)
-                  </p>
-                )}
+
               </div>
             </div>
-            {item.explanation && item.explanation.length > 0 && (
-              <p style={{ fontSize: "12px", color: "#666", marginTop: "10px" }}>
-                {item.explanation.join(" • ")}
-              </p>
-            )}
+
           </div>
         ))}
       </div>
