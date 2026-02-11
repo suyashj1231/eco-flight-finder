@@ -3,6 +3,7 @@ from datetime import datetime
 from user_model import UserProfile
 from search_context import SearchContext, SortBy
 from fuel_utils import fuel_db
+from airport_utils import airport_db
 
 
 class FlightRecommender:
@@ -118,26 +119,55 @@ class FlightRecommender:
 
         # Parse distance
         distance_km = 0
+        # Helper to get nested or flat
+        def get_val(obj, key, nested_key=None):
+            if nested_key and key in obj and isinstance(obj[key], dict):
+                return obj[key].get(nested_key)
+            return obj.get(key)
+
+        # Parse distance
+        distance_km = 0
         if "distance" in flight and isinstance(flight["distance"], dict):
             distance_km = flight["distance"].get("km", 0) or 0
         elif "distance" in flight:
             distance_km = float(flight["distance"]) if flight["distance"] else 0
 
-        # Parse times and calculate duration
-        duration_hours = 0
+        # If API returns 0 distance, calculate it manually using airport coords
+        if not distance_km:
+            try:
+                # Need dep_iata and arr_iata
+                dep_iata = get_val(flight, "departure", "iata")
+                arr_iata = get_val(flight, "arrival", "iata")
+                
+                if dep_iata and arr_iata:
+                    dep_coords = airport_db.get_coordinates(dep_iata)
+                    arr_coords = airport_db.get_coordinates(arr_iata)
+                    
+                    if dep_coords and arr_coords:
+                        distance_km = airport_db.calculate_distance(
+                            dep_coords[0], dep_coords[1],
+                            arr_coords[0], arr_coords[1]
+                        )
+            except Exception as e:
+                print(f"Error calculating distance manually: {e}")
+
+        sched_dep = get_val(flight, "scheduled_departure") or get_val(flight, "departure", "scheduled")
+        sched_arr = get_val(flight, "scheduled_arrival") or get_val(flight, "arrival", "scheduled")
+
         try:
-            sched_dep = flight.get("scheduled_departure")
-            sched_arr = flight.get("scheduled_arrival")
-            
             if sched_dep and sched_arr:
+                # Handle timezones if present, else assume UTC if Z or isoformat
+                # AviationStack sends: "2026-02-10T22:55:00+00:00"
                 dep_time = datetime.fromisoformat(sched_dep.replace("Z", "+00:00"))
                 arr_time = datetime.fromisoformat(sched_arr.replace("Z", "+00:00"))
                 duration_hours = (arr_time - dep_time).total_seconds() / 3600
-        except Exception:
+        except Exception as e:
+            print(f"Error calculating duration: {e}")
             duration_hours = 0
 
         # Get aircraft and calculate emissions
-        aircraft_iata = flight.get("aircraft", {}).get("iata", "UNK")
+        aircraft_obj = flight.get("aircraft") or {}
+        aircraft_iata = aircraft_obj.get("iata", "UNK")
         emissions_kg = 0
         
         if aircraft_iata and aircraft_iata != "UNK" and distance_km > 0:
@@ -150,15 +180,18 @@ class FlightRecommender:
                 if fuel_kg_per_km and max_pax:
                     emissions_kg = (fuel_kg_per_km * co2_per_kg_fuel / max_pax) * distance_km
 
+        flight_obj = flight.get("flight") or {}
+        airline_obj = flight.get("airline") or {}
+
         return {
-            "flight_number": flight.get("flight", {}).get("iata", "N/A"),
-            "airline": flight.get("airline", {}).get("name", "Unknown"),
+            "flight_number": flight_obj.get("iata", "N/A"),
+            "airline": airline_obj.get("name", "Unknown"),
             "aircraft": aircraft_iata,
             "distance_km": distance_km,
             "duration_hours": duration_hours,
             "emissions_kg": emissions_kg,
-            "departure": flight.get("scheduled_departure"),
-            "arrival": flight.get("scheduled_arrival"),
+            "departure": sched_dep,
+            "arrival": sched_arr,
         }
 
     def _normalize_and_rank(self, flight: Dict, context: SearchContext) -> tuple:
