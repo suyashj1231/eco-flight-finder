@@ -1,6 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv, find_dotenv
+from google_flight_emissions import get_emissions
 
 # Load environment variables
 load_dotenv(find_dotenv())
@@ -78,3 +79,23 @@ def format_flight_data(flight):
         'arr_time': arrival.get('scheduled'),
         'aircraft': aircraft.get('iata') # Valuable for CO2
     }
+
+if __name__ == "__main__":
+    flights = search_flights("SFO", "JFK", "2026-02-14")
+    
+    if flights:
+        print(f"Found {len(flights)} flights. Fetching emission data...")
+        
+        emissions = get_emissions(flights) or []
+        
+        for flight, emission in zip(flights, emissions):
+            flight_info = format_flight_data(flight)
+            
+            emissions_obj = emission.get('emissionsGramsPerPax', {})
+            economy_co2 = emissions_obj.get('economy', 'N/A')
+            
+            print(f"Flight: {flight_info['flight_number']}")
+            print(f"CO2 (Economy): {economy_co2}g")
+            print("-" * 30)
+    else:
+        print("No flights found. Check your AviationStack API key or search parameters.")
