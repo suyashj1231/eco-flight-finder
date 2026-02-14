@@ -1,7 +1,18 @@
+import os
 import requests
+from dotenv import load_dotenv, find_dotenv
+from pathlib import Path
+
+# Load environment variables
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(env_path)
 
 def get_emissions(flights):
-    api_key = "AIzaSyC_4JUezL_yx94H_cqyx74mBL7L4BHSunU"
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        print("Error: GOOGLE_API_KEY not found in environment variables.")
+        return None
+
     url = f"https://travelimpactmodel.googleapis.com/v1/flights:computeFlightEmissions?key={api_key}"
     
     payload = {"flights": flights}

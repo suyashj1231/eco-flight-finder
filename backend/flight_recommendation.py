@@ -2,7 +2,6 @@ from typing import List, Dict, Optional, Union
 from datetime import datetime
 from user_model import UserProfile
 from search_context import SearchContext, SortBy
-from fuel_utils import fuel_db
 from airport_utils import airport_db
 from google_flight_emissions import get_emissions
 
