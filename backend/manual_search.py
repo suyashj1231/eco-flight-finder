@@ -9,7 +9,7 @@ from dotenv import load_dotenv, find_dotenv
 from flight_api import search_flights
 from flight_recommendation import FlightRecommender
 from search_context import SearchContext
-from user_model import UserProfile
+
 
 # Load environment variables
 load_dotenv(find_dotenv())
@@ -64,20 +64,13 @@ def main():
     print(f"Found {len(flights)} flights. Processing data...\n")
 
     # 3. Process and Rank
-    dummy_user = UserProfile(
-        google_id="manual_cli",
-        email="cli@example.com",
-        first_name="Manual",
-        last_name="User",
-        age=30, height_cm=180, weight_kg=75
-    )
-    
+
     context = SearchContext(
         departure_iata=dep_iata, arrival_iata=arr_iata,
         departure_date=date_str, eco_mode=True, seat_class="economy"
     )
 
-    recommender = FlightRecommender(dummy_user)
+    recommender = FlightRecommender()
     ranked_results = recommender.rank_flights(flights, context)
 
     # 4. Display Cleaned Results
