@@ -241,7 +241,6 @@ class FlightRecommender:
         emissions_kg = 0
         if emissions_cache and id(flight) in emissions_cache:
             emissions_kg = emissions_cache.get(id(flight), 0)
-        
         # Fallback Estimation if API returns 0 or failed
         if not emissions_kg and distance_km > 0:
             # Average avg CO2 per km per passenger for economy (approx 115g/km)
