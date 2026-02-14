@@ -4,7 +4,7 @@ from user_model import UserProfile
 from search_context import SearchContext, SortBy
 from fuel_utils import fuel_db
 from airport_utils import airport_db
-
+from google_flight_emissions import get_emissions
 
 class FlightRecommender:
     """Scores and ranks flights based on emissions, duration, and user preferences"""
@@ -169,7 +169,9 @@ class FlightRecommender:
         aircraft_obj = flight.get("aircraft") or {}
         aircraft_iata = aircraft_obj.get("iata", "UNK")
         emissions_kg = 0
-        
+        # this comment section was the original part calculating emissions before
+        # the google API
+        """
         if aircraft_iata and aircraft_iata != "UNK" and distance_km > 0:
             aircraft_data = fuel_db.get_aircraft_data(aircraft_iata)
             if aircraft_data:
@@ -180,6 +182,24 @@ class FlightRecommender:
                 
                 if fuel_kg_per_km and max_pax:
                     emissions_kg = (fuel_kg_per_km * co2_per_kg_fuel / max_pax) * distance_km
+        """
+        iso = flight["departure"]["scheduled"]
+        dt = datetime.fromisoformat(iso)
+        departure_date = { "year": dt.year, "month": dt.month, "day": dt.day }
+        my_flight = {
+            "origin": f"{flight['departure']['iata']}",
+            "destination": f"{flight['arrival']['iata']}",
+            "operatingCarrierCode": f"{flight['airline']['iata']}",
+            "flightNumber": f"{flight['flight']['number']}",
+            "departureDate": departure_date
+        }
+        emission_api_return = get_emissions(my_flight)[0]
+        # gets the emissions for economy
+        if emission_api_return and "emissionsGramsPerPax" in emission_api_return:
+            emissions_kg = emission_api_return.get('emissionsGramsPerPax', {}).get('economy', 'N/A')/1000
+        else:
+            emissions_kg = 0
+    
 
         flight_obj = flight.get("flight") or {}
         airline_obj = flight.get("airline") or {}

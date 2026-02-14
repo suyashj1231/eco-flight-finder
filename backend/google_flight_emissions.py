@@ -1,5 +1,5 @@
 import requests
-"""
+
 def get_emissions(flights):
     api_key = "AIzaSyC_4JUezL_yx94H_cqyx74mBL7L4BHSunU"
     url = f"https://travelimpactmodel.googleapis.com/v1/flights:computeFlightEmissions?key={api_key}"
@@ -40,7 +40,7 @@ def get_emissions(flights):
     else:
         print(f"Error: {response.text}")
         return []
-
+"""
 if __name__ == "__main__":
     my_flights = [
     {
