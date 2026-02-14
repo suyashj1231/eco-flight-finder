@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional, Union
 from datetime import datetime
-from user_model import UserProfile
+
 from search_context import SearchContext, SortBy
 from airport_utils import airport_db
 from google_flight_emissions import get_emissions
@@ -8,8 +8,8 @@ from google_flight_emissions import get_emissions
 class FlightRecommender:
     """Scores and ranks flights based on emissions, duration, and user preferences"""
 
-    def __init__(self, user: UserProfile):
-        self.user = user
+    def __init__(self):
+        pass
 
     def rank_flights(self, flights: Union[List, List[Dict]], context: SearchContext) -> List[Dict]:
         """

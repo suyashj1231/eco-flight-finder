@@ -15,8 +15,7 @@ from pydantic import BaseModel
 # Add backend directory to Python path
 sys.path.insert(0, os.path.dirname(__file__))
 
-from user_manager import user_manager
-from user_model import UserProfile
+
 from search_context import SearchContext, SortBy
 from flight_api import search_flights
 from flight_recommendation import FlightRecommender
@@ -34,25 +33,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-GOOGLE_TOKENINFO_URL = "https://oauth2.googleapis.com/tokeninfo"
 
-
-class AuthToken(BaseModel):
-    id_token: str
-
-
-class CreateUserRequest(BaseModel):
-    google_id: str
-    email: str
-    first_name: str
-    last_name: str
-    age: int
-    height_cm: float
-    weight_kg: float
 
 
 class SearchRequest(BaseModel):
-    google_id: Optional[str] = None
+    # google_id removed as user management is deleted
+
     departure_iata: str
     arrival_iata: str
     departure_date: str
@@ -69,66 +55,13 @@ def health():
     return {"status": "ok"}
 
 
-@app.post("/auth/google")
-def auth_google(token: AuthToken):
-    """Verify Google ID token using Google's tokeninfo endpoint and return basic profile info.
-    Note: For production verify audience (client_id) and use the official Google libraries.
-    """
-    params = {"id_token": token.id_token}
-    try:
-        resp = requests.get(GOOGLE_TOKENINFO_URL, params=params)
-        resp.raise_for_status()
-        data = resp.json()
-    except requests.RequestException as e:
-        raise HTTPException(status_code=400, detail=f"Token verification failed: {e}")
 
-    # Expected keys include: sub (user id), email, email_verified, name, given_name, family_name
-    google_id = data.get("sub")
-    email = data.get("email")
-    first_name = data.get("given_name")
-    last_name = data.get("family_name")
-
-    if not google_id or not email:
-        raise HTTPException(status_code=400, detail="Invalid token: missing user info")
-
-    return {
-        "google_id": google_id,
-        "email": email,
-        "first_name": first_name,
-        "last_name": last_name,
-        "raw": data,
-    }
-
-
-@app.post("/user")
-def create_or_update_user(req: CreateUserRequest):
-    user = user_manager.create_or_update_user(
-        google_id=req.google_id,
-        email=req.email,
-        first_name=req.first_name,
-        last_name=req.last_name,
-        age=req.age,
-        height_cm=req.height_cm,
-        weight_kg=req.weight_kg,
-    )
-
-    return user.to_dict()
-
-
-@app.get("/user/{google_id}")
-def get_user(google_id: str):
-    user = user_manager.get_user(google_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user.to_dict()
 
 
 @app.post("/search")
 def search_and_recommend(req: SearchRequest):
-    # Retrieve user if provided (optional for guest search)
-    user = None
-    if req.google_id:
-        user = user_manager.get_user(req.google_id)
+    # Retrieve user logic removed
+
 
     # Build search context
     sort_by = None
@@ -180,19 +113,7 @@ def search_and_recommend(req: SearchRequest):
         for out in outbound:
             composites.append(out)
 
-    # Use a lightweight user placeholder if none provided
-    if not user:
-        user = UserProfile(
-            google_id="guest",
-            email="",
-            first_name="Guest",
-            last_name="",
-            age=0,
-            height_cm=0.0,
-            weight_kg=0.0,
-        )
-
-    recommender = FlightRecommender(user)
+    recommender = FlightRecommender()
     ranked = recommender.rank_flights(composites, context)
 
     # Convert to serializable structure
