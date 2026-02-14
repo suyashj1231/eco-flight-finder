@@ -1,16 +1,18 @@
-from typing import Optional
 import sys
+from typing import Optional
 import os
 from pathlib import Path
 
-# Load environment variables first
-from dotenv import load_dotenv, find_dotenv
-env_path = Path(__file__).parent.parent / ".env"
-load_dotenv(env_path)
-
+import logging
 import requests
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+# Configure logging to console
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Add backend directory to Python path
 sys.path.insert(0, os.path.dirname(__file__))
@@ -19,15 +21,23 @@ sys.path.insert(0, os.path.dirname(__file__))
 from search_context import SearchContext, SortBy
 from flight_api import search_flights
 from flight_recommendation import FlightRecommender
+import models, schemas, auth, database
+from sqlalchemy.orm import Session
+from fastapi import Depends, status
+from fastapi.security import OAuth2PasswordRequestForm
+from datetime import timedelta
+
+# Initialize DB tables
+models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI(title="Eco Flight Finder API")
 
 # CORS setup - allow local frontend development origins by default
+# CORS setup - allow all origins for development
 from fastapi.middleware.cors import CORSMiddleware
-_origins = os.getenv("FRONTEND_ORIGINS", "http://localhost:5173,http://localhost:3000").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,12 +64,106 @@ class SearchRequest(BaseModel):
 def health():
     return {"status": "ok"}
 
+# --- Auth Endpoints ---
+
+@app.post("/register", response_model=schemas.User)
+def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    logger.debug(f"Attempting to register user {user.username}")
+    try:
+        db_user = db.query(models.User).filter(models.User.username == user.username).first()
+        if db_user:
+            logger.warning(f"Username {user.username} already registered")
+            raise HTTPException(status_code=400, detail="Username already registered")
+        
+        logger.debug("Hashing password...")
+        hashed_password = auth.get_password_hash(user.password)
+        logger.debug("Password hashed successfully")
+        
+        new_user = models.User(
+            username=user.username,
+            hashed_password=hashed_password,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            age=user.age
+        )
+        logger.debug("Adding user to DB...")
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        logger.debug("User registered successfully")
+        return new_user
+    except Exception as e:
+        logger.error(f"ERROR inside register: {e}", exc_info=True)
+        raise e
+
+@app.post("/token", response_model=schemas.Token)
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
+    user = db.query(models.User).filter(models.User.username == form_data.username).first()
+    if not user or not auth.verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth.create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/users/me", response_model=schemas.User)
+def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
+    return current_user
+
+@app.put("/users/me", response_model=schemas.User)
+def update_user_me(user_update: schemas.UserUpdate, current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
+    if user_update.first_name:
+        current_user.first_name = user_update.first_name
+    if user_update.last_name:
+        current_user.last_name = user_update.last_name
+    if user_update.age is not None:
+        current_user.age = user_update.age
+        
+    if user_update.new_password:
+        # Require old password if setting new one
+        if not user_update.old_password:
+             raise HTTPException(status_code=400, detail="Old password required to change password")
+        if not auth.verify_password(user_update.old_password, current_user.hashed_password):
+             raise HTTPException(status_code=400, detail="Incorrect old password")
+        current_user.hashed_password = auth.get_password_hash(user_update.new_password)
+    
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+@app.get("/users/history", response_model=list[schemas.SearchHistory])
+def read_search_history(current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
+    return current_user.searches
+
 
 
 
 
 @app.post("/search")
-def search_and_recommend(req: SearchRequest):
+def search_public(req: SearchRequest):
+    return search_and_recommend_logic(req)
+
+@app.post("/search_authenticated")
+async def search_authenticated(req: SearchRequest, current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
+    # Save history
+    history = models.SearchHistory(
+        departure_iata=req.departure_iata,
+        arrival_iata=req.arrival_iata,
+        departure_date=req.departure_date,
+        return_date=req.return_date,
+        user_id=current_user.id
+    )
+    db.add(history)
+    db.commit()
+    
+    return search_and_recommend_logic(req)
+
+def search_and_recommend_logic(req: SearchRequest):
     # Retrieve user logic removed
 
 

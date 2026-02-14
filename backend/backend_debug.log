@@ -1,0 +1,36 @@
+2026-02-14 13:21:55,869 - passlib.utils.compat - DEBUG - loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
+2026-02-14 13:21:55,869 - passlib.utils.compat - DEBUG - loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
+2026-02-14 13:21:55,869 - passlib.utils.compat - DEBUG - loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
+2026-02-14 13:21:55,872 - passlib.registry - DEBUG - registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
+2026-02-14 13:21:55,922 - asyncio - DEBUG - Using selector: SelectSelector
+2026-02-14 13:21:56,085 - passlib.utils.compat - DEBUG - loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
+2026-02-14 13:21:56,085 - passlib.utils.compat - DEBUG - loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
+2026-02-14 13:21:56,085 - passlib.utils.compat - DEBUG - loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
+2026-02-14 13:21:56,088 - passlib.registry - DEBUG - registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
+2026-02-14 13:21:56,135 - asyncio - DEBUG - Using selector: SelectSelector
+2026-02-14 13:22:06,304 - passlib.utils.compat - DEBUG - loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
+2026-02-14 13:22:06,304 - passlib.utils.compat - DEBUG - loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
+2026-02-14 13:22:06,304 - passlib.utils.compat - DEBUG - loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
+2026-02-14 13:22:06,306 - passlib.registry - DEBUG - registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
+2026-02-14 13:22:06,357 - asyncio - DEBUG - Using selector: SelectSelector
+2026-02-14 13:22:06,511 - passlib.utils.compat - DEBUG - loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
+2026-02-14 13:22:06,511 - passlib.utils.compat - DEBUG - loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
+2026-02-14 13:22:06,511 - passlib.utils.compat - DEBUG - loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
+2026-02-14 13:22:06,513 - passlib.registry - DEBUG - registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
+2026-02-14 13:22:06,560 - asyncio - DEBUG - Using selector: SelectSelector
+2026-02-14 13:22:11,967 - api - DEBUG - Attempting to register user debug_user_99
+2026-02-14 13:22:11,970 - api - DEBUG - Hashing password...
+2026-02-14 13:22:11,970 - passlib.handlers.bcrypt - DEBUG - detected 'bcrypt' backend, version '3.2.0'
+2026-02-14 13:22:11,971 - passlib.handlers.bcrypt - DEBUG - 'bcrypt' backend lacks $2$ support, enabling workaround
+2026-02-14 13:22:12,150 - api - DEBUG - Password hashed successfully
+2026-02-14 13:22:12,150 - api - DEBUG - Adding user to DB...
+2026-02-14 13:22:12,155 - api - DEBUG - User registered successfully
+2026-02-14 13:22:12,157 - python_multipart.multipart - DEBUG - Calling on_field_start with no data
+2026-02-14 13:22:12,157 - python_multipart.multipart - DEBUG - Calling on_field_name with data[0:8]
+2026-02-14 13:22:12,157 - python_multipart.multipart - DEBUG - Calling on_field_data with data[9:22]
+2026-02-14 13:22:12,157 - python_multipart.multipart - DEBUG - Calling on_field_end with no data
+2026-02-14 13:22:12,157 - python_multipart.multipart - DEBUG - Calling on_field_start with no data
+2026-02-14 13:22:12,157 - python_multipart.multipart - DEBUG - Calling on_field_name with data[23:31]
+2026-02-14 13:22:12,157 - python_multipart.multipart - DEBUG - Calling on_field_data with data[32:43]
+2026-02-14 13:22:12,157 - python_multipart.multipart - DEBUG - Calling on_field_end with no data
+2026-02-14 13:22:12,157 - python_multipart.multipart - DEBUG - Calling on_end with no data

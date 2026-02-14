@@ -22,10 +22,78 @@ class FlightRecommender:
         Returns:
             List of ranked flight dicts with scores and explanations
         """
-        scored = []
+        # 1. Collect unique flight segments to verify
+        unique_segments = {}
+        for item in flights:
+            if isinstance(item, dict) and "outbound" in item and "inbound" in item:
+                unique_segments[id(item["outbound"])] = item["outbound"]
+                unique_segments[id(item["inbound"])] = item["inbound"]
+            else:
+                unique_segments[id(item)] = item
 
+        # 2. Build payload for Google API
+        segment_list = list(unique_segments.values())
+        payload_inputs = []
+        id_to_index = {}
+
+        for i, flight in enumerate(segment_list):
+            try:
+                # Extract clean data for API
+                dep_iata = flight.get('departure', {}).get('iata')
+                arr_iata = flight.get('arrival', {}).get('iata')
+                carrier = flight.get('airline', {}).get('iata')
+                f_num = flight.get('flight', {}).get('number')
+                iso_date = flight.get('departure', {}).get('scheduled')
+                
+                # Check for validity
+                if dep_iata and arr_iata and carrier and f_num and iso_date:
+                    # Parse date components
+                    dt = datetime.fromisoformat(iso_date.replace("Z", "+00:00"))
+                    
+                    payload_inputs.append({
+                        "origin": dep_iata,
+                        "destination": arr_iata,
+                        "operatingCarrierCode": carrier,
+                        "flightNumber": int(f_num) if str(f_num).isdigit() else 0,
+                        "departureDate": {"year": dt.year, "month": dt.month, "day": dt.day}
+                    })
+                    # Map flight object ID to the index in the payload list
+                    id_to_index[id(flight)] = len(payload_inputs) - 1
+            except Exception as e:
+                print(f"Skipping extraction for flight {i}: {e}")
+
+        # 3. Batch Call to Google API (Chunked)
+        emissions_cache = {} # id -> emissions_kg
+        
+        if payload_inputs:
+            chunk_size = 50 # Google limit is 100 usually, playing safe
+            all_emissions_results = []
+            
+            for i in range(0, len(payload_inputs), chunk_size):
+                chunk = payload_inputs[i:i+chunk_size]
+                try:
+                    results = get_emissions(chunk)
+                    if results:
+                        all_emissions_results.extend(results)
+                    else:
+                        # If API fails, append Nones
+                        all_emissions_results.extend([None] * len(chunk))
+                except Exception as e:
+                    print(f"Batch emissions error: {e}")
+                    all_emissions_results.extend([None] * len(chunk))
+
+            # 4. Map results back to flight IDs
+            for flight_id, idx in id_to_index.items():
+                if idx < len(all_emissions_results):
+                    res = all_emissions_results[idx]
+                    if res and "emissionsGramsPerPax" in res:
+                        kg = res.get('emissionsGramsPerPax', {}).get('economy', 0) / 1000.0
+                        emissions_cache[flight_id] = kg
+
+        # 5. Score and Rank
+        scored = []
         for flight in flights:
-            score_result = self.calculate_flight_score(flight, context)
+            score_result = self.calculate_flight_score(flight, context, emissions_cache)
             scored.append(score_result)
 
         # Sort by rank_score (lower is better)
@@ -33,18 +101,19 @@ class FlightRecommender:
 
         return ranked
 
-    def calculate_flight_score(self, flight: Union[Dict, List], context: SearchContext) -> Dict:
+    def calculate_flight_score(self, flight: Union[Dict, List], context: SearchContext, emissions_cache: Dict = None) -> Dict:
         """
         Calculate emissions, duration, and ranking score for a flight or roundtrip composite
         
         Args:
             flight: Single flight dict or composite {outbound, inbound}
             context: SearchContext with filters
+            emissions_cache: Dict mapping flight object ID to emissions in kg
             
         Returns:
             Dict with formatted flight, score, filters applied, and explanation
         """
-        formatted = self._format_flight(flight)
+        formatted = self._format_flight(flight, emissions_cache)
 
         # Apply filters
         filter_reason = None
@@ -74,7 +143,7 @@ class FlightRecommender:
             "explanation": explanation,
         }
 
-    def _format_flight(self, flight: Union[Dict, List]) -> Dict:
+    def _format_flight(self, flight: Union[Dict, List], emissions_cache: Dict = None) -> Dict:
         """
         Format flight data from API response or composite roundtrip
         
@@ -82,18 +151,18 @@ class FlightRecommender:
         """
         # Handle composite roundtrip: {outbound, inbound}
         if isinstance(flight, dict) and "outbound" in flight and "inbound" in flight:
-            return self._format_composite_roundtrip(flight)
+            return self._format_composite_roundtrip(flight, emissions_cache)
         
         # Handle single flight
-        return self._format_single_flight(flight)
+        return self._format_single_flight(flight, emissions_cache)
 
-    def _format_composite_roundtrip(self, composite: Dict) -> Dict:
+    def _format_composite_roundtrip(self, composite: Dict, emissions_cache: Dict = None) -> Dict:
         """Format a roundtrip composite with outbound and inbound flights"""
         outbound = composite.get("outbound", {})
         inbound = composite.get("inbound", {})
 
-        out_fmt = self._format_single_flight(outbound)
-        in_fmt = self._format_single_flight(inbound)
+        out_fmt = self._format_single_flight(outbound, emissions_cache)
+        in_fmt = self._format_single_flight(inbound, emissions_cache)
 
         # Sum emissions and duration
         total_emissions = (out_fmt.get("emissions_kg", 0) or 0) + (in_fmt.get("emissions_kg", 0) or 0)
@@ -111,7 +180,7 @@ class FlightRecommender:
             "inbound": in_fmt,
         }
 
-    def _format_single_flight(self, flight: Dict) -> Dict:
+    def _format_single_flight(self, flight: Dict, emissions_cache: Dict = None) -> Dict:
         """Parse a single flight from AviationStack API response"""
         if not flight:
             return {}
@@ -167,37 +236,23 @@ class FlightRecommender:
         # Get aircraft and calculate emissions
         aircraft_obj = flight.get("aircraft") or {}
         aircraft_iata = aircraft_obj.get("iata", "UNK")
+        
+        # Retrieve from cache if available
         emissions_kg = 0
-        # this comment section was the original part calculating emissions before
-        # the google API
-        """
-        if aircraft_iata and aircraft_iata != "UNK" and distance_km > 0:
-            aircraft_data = fuel_db.get_aircraft_data(aircraft_iata)
-            if aircraft_data:
-                fuel_kg_per_km = aircraft_data.get("fuel_kg_km", 0)
-                max_pax = aircraft_data.get("max_pax", 0)
-
-                co2_per_kg_fuel = 3.16  # kg CO2 per kg jet fuel
-                
-                if fuel_kg_per_km and max_pax:
-                    emissions_kg = (fuel_kg_per_km * co2_per_kg_fuel / max_pax) * distance_km
-        """
-        iso = flight["departure"]["scheduled"]
-        dt = datetime.fromisoformat(iso)
-        departure_date = { "year": dt.year, "month": dt.month, "day": dt.day }
-        my_flight = {
-            "origin": f"{flight['departure']['iata']}",
-            "destination": f"{flight['arrival']['iata']}",
-            "operatingCarrierCode": f"{flight['airline']['iata']}",
-            "flightNumber": f"{flight['flight']['number']}",
-            "departureDate": departure_date
-        }
-        emission_api_return = get_emissions(my_flight)[0]
-        # gets the emissions for economy
-        if emission_api_return and "emissionsGramsPerPax" in emission_api_return:
-            emissions_kg = emission_api_return.get('emissionsGramsPerPax', {}).get('economy', 'N/A')/1000
-        else:
-            emissions_kg = 0
+        if emissions_cache and id(flight) in emissions_cache:
+            emissions_kg = emissions_cache.get(id(flight), 0)
+        
+        # Fallback Estimation if API returns 0 or failed
+        if not emissions_kg and distance_km > 0:
+            # Average avg CO2 per km per passenger for economy (approx 115g/km)
+            # This is a rough industry average for short/medium haul
+            AVERAGE_CO2_PER_KM = 0.115 
+            emissions_kg = distance_km * AVERAGE_CO2_PER_KM
+            # We could flag this as estimated if we wanted to show UI hint
+            # flight['is_estimated'] = True 
+        elif not emissions_kg:
+             # Last resort if no distance either
+             emissions_kg = 0
     
 
         flight_obj = flight.get("flight") or {}
