@@ -67,9 +67,12 @@ def health():
 # --- Airport Suggestion Logic ---
 AIRPORT_DATA = []
 try:
-    with open("airports.json", "r", encoding="utf-8") as f:
+    # Use absolute path or relative to this file
+    base_dir = Path(__file__).parent
+    airports_path = base_dir / "airports.json"
+    with open(airports_path, "r", encoding="utf-8") as f:
         AIRPORT_DATA = json.load(f)
-    print(f"Loaded {len(AIRPORT_DATA)} airports.")
+    print(f"Loaded {len(AIRPORT_DATA)} airports from {airports_path}.")
 except Exception as e:
     print(f"Failed to load airports.json: {e}")
 
@@ -131,8 +134,11 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
         logger.debug("User registered successfully")
         return new_user
     except Exception as e:
-        logger.error(f"ERROR inside register: {e}", exc_info=True)
-        raise e
+        logger.error(f"CRITICAL ERROR inside register for user {user.username}: {type(e).__name__}: {e}", exc_info=True)
+        # Log specifically for bcrypt issue if it matches the pattern
+        if "72 bytes" in str(e):
+             logger.error("BCRYPT VERSION CONFLICT DETECTED: Password > 72 bytes or bcrypt version mismatch.")
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @app.post("/token", response_model=schemas.Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
