@@ -53,7 +53,11 @@ export default function SearchHistory({ token, onClose, onClear }) {
                     {!loading && !error && history.map((item) => (
                         <div key={item.id} className="history-item">
                             <div className="history-header">
-                                <strong>{item.departure_iata} ➔ {item.arrival_iata}</strong>
+                                {item.return_date ? (
+                                    <strong>{item.departure_iata} ⇄ {item.arrival_iata}</strong>
+                                ) : (
+                                    <strong>{item.departure_iata} ➔ {item.arrival_iata}</strong>
+                                )}
                                 <span className="history-timestamp">{formatDate(item.search_timestamp)}</span>
                             </div>
                             <div className="history-details">

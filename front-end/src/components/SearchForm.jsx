@@ -68,13 +68,16 @@ export default function SearchForm({ onSearch, lastSearch }) {
           onChange={handleChange}
           required
         />
-        <input
-          type="date"
-          name="return_date"
-          value={formData.return_date}
-          onChange={handleChange}
-          placeholder="Return Date (Optional)"
-        />
+        {(formData.is_round_trip || formData.return_date) && (
+          <input
+            type="date"
+            name="return_date"
+            value={formData.return_date}
+            onChange={handleChange}
+            placeholder="Return Date"
+            required={formData.is_round_trip}
+          />
+        )}
       </div>
 
       <div className="options-row">
@@ -88,14 +91,32 @@ export default function SearchForm({ onSearch, lastSearch }) {
           Eco Mode (Prioritize Low CO₂)
         </label>
 
-        <label className="checkbox-label disabled-label" title="Only direct flights are currently supported">
+        <label className="checkbox-label">
           <input
             type="checkbox"
-            checked={true}
-            disabled
+            name="round_trip"
+            checked={!!formData.return_date || formData.is_round_trip}
+            onChange={(e) => {
+              const isChecked = e.target.checked;
+              setFormData(prev => ({
+                ...prev,
+                is_round_trip: isChecked,
+                return_date: isChecked ? prev.return_date : ''
+              }));
+            }}
           />
-          Direct Flights Only
+          Round Trip
         </label>
+      </div>
+
+      <div style={{
+        color: '#e74c3c',
+        fontSize: '0.75rem',
+        marginBottom: '8px',
+        textAlign: 'center',
+        fontWeight: '500'
+      }}>
+        Only direct flights are currently supported
       </div>
 
       <button type="submit">

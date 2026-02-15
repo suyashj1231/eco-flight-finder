@@ -96,7 +96,9 @@ function App() {
       }
 
       const data = await response.json();
-      setResults(data.results || []);
+      // data is { outbound: [...], inbound: [...] }
+      setResults(data);
+
       // Refresh history if authenticated
       if (token) {
         fetchHistory(token);
@@ -193,7 +195,11 @@ function App() {
                   })}
                 >
                   <div className="history-route">
-                    {item.departure_iata} ➔ {item.arrival_iata}
+                    {item.return_date ? (
+                      <span>{item.departure_iata} ⇄ {item.arrival_iata}</span>
+                    ) : (
+                      <span>{item.departure_iata} ➔ {item.arrival_iata}</span>
+                    )}
                   </div>
                   <div className="history-date">
                     {item.departure_date}
@@ -206,7 +212,7 @@ function App() {
 
         {loading && <p className="loading-msg">Searching flights... This might take a moment.</p>}
         {error && <div className="error-msg"><strong>Error:</strong> {error}</div>}
-        {!loading && !error && results.length > 0 &&
+        {!loading && !error && results && (results.outbound?.length > 0 || results.inbound?.length > 0) &&
           <Results
             results={results}
             resultsPerPage={user?.results_per_page || 8}
