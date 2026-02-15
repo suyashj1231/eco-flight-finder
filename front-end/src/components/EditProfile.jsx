@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './Modal.css';
 
 export default function EditProfile({ user, token, onClose, onUpdate }) {
     const [firstName, setFirstName] = useState(user.first_name || '');
@@ -13,8 +14,6 @@ export default function EditProfile({ user, token, onClose, onUpdate }) {
         e.preventDefault();
         setError(null);
         setSuccess(null);
-        console.log("Submit clicked. Current user prop:", user);
-        console.log("Current state:", { firstName, lastName, age });
 
         const payload = {};
         if (firstName !== user.first_name) payload.first_name = firstName;
@@ -38,7 +37,6 @@ export default function EditProfile({ user, token, onClose, onUpdate }) {
         }
 
         try {
-            console.log("Sending PUT request to /users/me with payload:", payload);
             const response = await fetch('/users/me', {
                 method: 'PUT',
                 headers: {
@@ -65,113 +63,79 @@ export default function EditProfile({ user, token, onClose, onUpdate }) {
     };
 
     return (
-        <div style={styles.overlay}>
-            <div style={styles.modal}>
-                <h3>Edit Profile</h3>
-                <p>User ID: <strong>{user.username}</strong> (Cannot be changed)</p>
+        <div className="modal-overlay">
+            <div className="modal-content">
+                <div className="modal-header">
+                    <h3>Edit Profile</h3>
+                    <button onClick={onClose} className="close-btn">&times;</button>
+                </div>
 
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {success && <p style={{ color: 'green' }}>{success}</p>}
+                <div className="modal-body">
+                    <p style={{ marginBottom: '15px', color: '#7f8c8d' }}>
+                        User ID: <strong>{user.username}</strong>
+                    </p>
 
-                <form onSubmit={handleSubmit} style={styles.form}>
-                    <label>First Name:</label>
-                    <input
-                        style={styles.input}
-                        type="text"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                    />
+                    {error && <p style={{ color: '#e74c3c', marginBottom: '10px' }}>{error}</p>}
+                    {success && <p style={{ color: '#27ae60', marginBottom: '10px' }}>{success}</p>}
 
-                    <label>Last Name:</label>
-                    <input
-                        style={styles.input}
-                        type="text"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                    />
+                    <form onSubmit={handleSubmit} className="modal-form">
+                        <div>
+                            <label>First Name:</label>
+                            <input
+                                type="text"
+                                style={{ width: '100%' }}
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                            />
+                        </div>
 
-                    <label>Age:</label>
-                    <input
-                        style={styles.input}
-                        type="number"
-                        value={age}
-                        onChange={(e) => setAge(e.target.value)}
-                    />
+                        <div>
+                            <label>Last Name:</label>
+                            <input
+                                type="text"
+                                style={{ width: '100%' }}
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                            />
+                        </div>
 
-                    <hr style={{ width: '100%', margin: '10px 0' }} />
+                        <div>
+                            <label>Age:</label>
+                            <input
+                                type="number"
+                                style={{ width: '100%' }}
+                                value={age}
+                                onChange={(e) => setAge(e.target.value)}
+                            />
+                        </div>
 
-                    <label>Change Password (Optional):</label>
-                    <input
-                        style={styles.input}
-                        type="password"
-                        placeholder="Old Password"
-                        value={oldPassword}
-                        onChange={(e) => setOldPassword(e.target.value)}
-                    />
-                    <input
-                        style={styles.input}
-                        type="password"
-                        placeholder="New Password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                    />
+                        <hr style={{ width: '100%', margin: '10px 0', border: 'none', borderTop: '1px solid #eee' }} />
 
-                    <div style={styles.buttons}>
-                        <button type="button" onClick={onClose} style={styles.cancelButton}>Close</button>
-                        <button type="submit" style={styles.saveButton}>Save Changes</button>
-                    </div>
-                </form>
+                        <div>
+                            <label>Change Password (Optional):</label>
+                            <input
+                                type="password"
+                                placeholder="Old Password"
+                                style={{ width: '100%', marginBottom: '10px' }}
+                                value={oldPassword}
+                                onChange={(e) => setOldPassword(e.target.value)}
+                            />
+                            <input
+                                type="password"
+                                placeholder="New Password"
+                                style={{ width: '100%' }}
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="modal-footer">
+                            <button type="button" onClick={onClose} className="btn-secondary">Close</button>
+                            <button type="submit" className="btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );
 }
-
-const styles = {
-    overlay: {
-        position: 'fixed',
-        top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000,
-    },
-    modal: {
-        backgroundColor: 'white',
-        padding: '20px',
-        borderRadius: '8px',
-        width: '400px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-    },
-    form: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
-    },
-    input: {
-        padding: '8px',
-        borderRadius: '4px',
-        border: '1px solid #ccc',
-    },
-    buttons: {
-        display: 'flex',
-        justifyContent: 'flex-end',
-        gap: '10px',
-        marginTop: '10px',
-    },
-    saveButton: {
-        padding: '8px 16px',
-        backgroundColor: '#1F9E78',
-        color: 'white',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-    },
-    cancelButton: {
-        padding: '8px 16px',
-        backgroundColor: '#ccc',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-    }
-};

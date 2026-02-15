@@ -1,44 +1,82 @@
+/* Input Form Layout */
 .input-form {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 20px;
+    gap: 20px;
+    width: 100%;
 }
 
+/* Glass Inputs */
 .input-form input,
-.input-form select,
-.input-form button {
-    background: rgba(255, 255, 255, 0.15);
-    border: none;
+.input-form select {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 12px;
-    padding: 14px 18px;
-    font-size: 16px;
-    color: black;
-    backdrop-filter: blur(6px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    padding: 16px 20px;
+    font-size: 1rem;
+    color: var(--text-dark);
+    backdrop-filter: blur(4px);
+    transition: var(--transition);
     width: 100%;
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+    font-family: var(--font-main);
+}
+
+.input-form input:focus,
+.input-form select:focus {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.25);
+    transform: translateY(-1px);
 }
 
 .input-form input::placeholder {
-    color: black;
-    opacity: 0.85;
+    color: #7f8c8d;
     font-weight: 300;
 }
 
-.input-form select {
-    color: black;
-    background-color: rgba(255, 255, 255, 0.15);
-}
-
-.input-form option {
-    color: black;
-}
-
-.top-row, .bottom-row {
-    display: flex;
-    gap: 10px;
+/* Primary Button */
+.input-form button {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border: none;
+    border-radius: 12px;
+    padding: 16px 32px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+    cursor: pointer;
+    transition: var(--transition);
     width: 100%;
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.input-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.6);
+}
+
+.input-form button:active {
+    transform: translateY(0);
+}
+
+/* Layout Rows */
+.top-row,
+.bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+
+    .top-row,
+    .bottom-row {
+        grid-template-columns: 1fr;
+    }
 }

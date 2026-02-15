@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import SearchForm from './components/SearchForm.jsx';
 import Results from './components/Results.jsx';
 import Auth from './components/Auth.jsx';
@@ -132,62 +132,35 @@ function App() {
       )}
 
       <div className='my-div'>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', position: 'relative' }}>
-          <h1 style={{ margin: 0 }}>Eco Flight Finder</h1>
+        <div className="app-header">
+          <h1 className="app-title">Eco Flight Finder</h1>
 
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => setShowMenu(!showMenu)}
-              style={{
-                padding: '8px 12px',
-                cursor: 'pointer',
-                backgroundColor: '#fff',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
+              className="menu-btn"
             >
               <strong>{user ? `${user.first_name} ${user.last_name}` : "Menu"}</strong>
-              <span>▼</span>
+              <span style={{ fontSize: '0.8rem' }}>▼</span>
             </button>
 
             {showMenu && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                backgroundColor: 'white',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                marginTop: '5px',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                width: '150px',
-                zIndex: 100,
-                overflow: 'hidden'
-              }}>
+              <div className="dropdown-menu">
                 <div
                   onClick={() => { setShowHistory(true); setShowMenu(false); }}
-                  style={{ padding: '10px', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                  className="dropdown-item"
                 >
                   Search History
                 </div>
                 <div
                   onClick={() => { setShowProfile(true); setShowMenu(false); }}
-                  style={{ padding: '10px', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                  className="dropdown-item"
                 >
                   Edit Details
                 </div>
                 <div
                   onClick={handleLogout}
-                  style={{ padding: '10px', cursor: 'pointer', color: '#d32f2f' }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                  className="dropdown-item logout"
                 >
                   Logout
                 </div>
@@ -199,13 +172,13 @@ function App() {
         <SearchForm onSearch={handleSearch} />
 
         {user && history.length > 0 && (
-          <div style={styles.recentSearches}>
-            <h4 style={styles.recentTitle}>Recent Searches</h4>
-            <div style={styles.historyGrid}>
+          <div className="recent-searches">
+            <h4 className="recent-title">Recent Searches</h4>
+            <div className="history-grid">
               {history.map(item => (
                 <div
                   key={item.id}
-                  style={styles.historyCard}
+                  className="history-card"
                   onClick={() => handleSearch({
                     departure: item.departure_iata,
                     arrival: item.arrival_iata,
@@ -213,19 +186,11 @@ function App() {
                     return_date: item.return_date,
                     eco_mode: true // Default for re-search
                   })}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
-                  }}
                 >
-                  <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
+                  <div className="history-route">
                     {item.departure_iata} ➔ {item.arrival_iata}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#666' }}>
+                  <div className="history-date">
                     {item.departure_date}
                   </div>
                 </div>
@@ -234,48 +199,12 @@ function App() {
           </div>
         )}
 
-        {loading && <p>Searching flights... This might take a moment.</p>}
-        {error && <p style={{ color: 'red', marginTop: '10px' }}><strong>Error:</strong> {error}</p>}
+        {loading && <p className="loading-msg">Searching flights... This might take a moment.</p>}
+        {error && <div className="error-msg"><strong>Error:</strong> {error}</div>}
         {!loading && !error && results.length > 0 && <Results results={results} />}
       </div>
     </div>
   )
-}
-
-const styles = {
-  recentSearches: {
-    marginTop: '25px',
-    textAlign: 'left',
-    width: '100%',
-    padding: '0 10px'
-  },
-  recentTitle: {
-    fontSize: '14px',
-    color: '#333',
-    marginBottom: '10px',
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-    borderBottom: '1px solid #eee',
-    paddingBottom: '5px'
-  },
-  historyGrid: {
-    display: 'flex',
-    gap: '12px',
-    overflowX: 'auto',
-    paddingBottom: '10px',
-    scrollbarWidth: 'thin'
-  },
-  historyCard: {
-    backgroundColor: '#fff',
-    border: '1px solid #e0e0e0',
-    borderRadius: '8px',
-    padding: '10px 15px',
-    minWidth: '130px',
-    flexShrink: 0,
-    boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-    cursor: 'pointer',
-    transition: 'transform 0.2s, box-shadow 0.2s',
-  }
 }
 
 export default App

@@ -1,84 +1,92 @@
-import { useState } from "react";
+import { useState } from 'react';
+import Autocomplete from './Autocomplete.jsx';
+import '../InputField.css';
 
 export default function SearchForm({ onSearch }) {
-  const [form, setForm] = useState({
-    departure: "SFO",
-    arrival: "JFK",
-    departure_date: "2026-02-10",
-    return_date: null,
-    eco_mode: true,
+  const [formData, setFormData] = useState({
+    departure: '',
+    arrival: '',
+    departure_date: '',
+    return_date: '',
+    eco_mode: true
   });
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
+    // If Autocomplete sends a custom event, it might not have type/checked
+    // So we handle it safely
+    const target = e.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+
+    setFormData(prev => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSearch(form);
+    onSearch(formData);
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "500px" }}>
-      <h2>Search Flights</h2>
-      <form onSubmit={handleSubmit}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "15px" }}>
-          <input
-            type="text"
-            name="departure"
-            placeholder="Departure (IATA)"
-            value={form.departure}
-            onChange={handleChange}
-            style={{ padding: "8px" }}
-          />
-          <input
-            type="text"
-            name="arrival"
-            placeholder="Arrival (IATA)"
-            value={form.arrival}
-            onChange={handleChange}
-            style={{ padding: "8px" }}
-          />
-        </div>
-        <div style={{ marginBottom: "15px" }}>
-          <input
-            type="date"
-            name="departure_date"
-            value={form.departure_date}
-            onChange={handleChange}
-            style={{ padding: "8px", width: "100%", boxSizing: "border-box" }}
-          />
-        </div>
-        <label style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
-          <input
-            type="checkbox"
-            name="eco_mode"
-            checked={form.eco_mode}
-            onChange={handleChange}
-            style={{ marginRight: "10px" }}
-          />
-          Eco Mode (Prioritize CO2 emissions)
-        </label>
-        <button
-          type="submit"
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#1F9E78",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            width: "100%",
-            fontSize: "16px",
-          }}
-        >
-          Search Flights
-        </button>
-      </form>
-    </div>
+    <form className="input-form" onSubmit={handleSubmit}>
+      <div className="top-row">
+        <Autocomplete
+          name="departure"
+          placeholder="From (City or Airport)"
+          value={formData.departure}
+          onChange={handleChange}
+          required
+        />
+        <Autocomplete
+          name="arrival"
+          placeholder="To (City or Airport)"
+          value={formData.arrival}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      <div className="bottom-row">
+        <input
+          type="date"
+          name="departure_date"
+          value={formData.departure_date}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="date"
+          name="return_date"
+          value={formData.return_date}
+          onChange={handleChange}
+          placeholder="Return Date (Optional)"
+        />
+      </div>
+
+      <label style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        color: 'var(--text-dark)',
+        cursor: 'pointer',
+        alignSelf: 'flex-start',
+        marginLeft: '5px'
+      }}>
+        <input
+          type="checkbox"
+          name="eco_mode"
+          checked={formData.eco_mode}
+          onChange={handleChange}
+          style={{ width: 'auto', margin: 0 }}
+        />
+        <span>Eco Mode (Prioritize Low CO₂)</span>
+      </label>
+
+      <button type="submit">
+        Find Flights
+      </button>
+    </form>
   );
 }

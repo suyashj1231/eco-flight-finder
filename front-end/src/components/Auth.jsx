@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './Auth.css';
 
 export default function Auth({ onLogin }) {
     const [isLogin, setIsLogin] = useState(true);
@@ -33,8 +34,19 @@ export default function Auth({ onLogin }) {
 
             if (!response.ok) throw new Error('Invalid credentials');
 
-            const data = await response.json();
-            onLogin(data.access_token);
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (e) {
+                console.error("Login response parse error:", e);
+                // default to empty or handle gracefully
+            }
+
+            if (data.access_token) {
+                onLogin(data.access_token);
+            } else {
+                throw new Error("No access token received");
+            }
         } catch (err) {
             setError(err.message);
         }
@@ -67,8 +79,13 @@ export default function Auth({ onLogin }) {
             });
 
             if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.detail || 'Registration failed');
+                let errData = {};
+                try {
+                    errData = await response.json();
+                } catch (e) {
+                    // Response was not JSON
+                }
+                throw new Error(errData.detail || `Registration failed: ${response.statusText}`);
             }
 
             // Auto Login Mechanism
@@ -96,16 +113,16 @@ export default function Auth({ onLogin }) {
     };
 
     return (
-        <div style={styles.container}>
-            <div style={styles.card}>
-                <h2>{isLogin ? 'Login' : 'Register'}</h2>
+        <div className="auth-container">
+            <div className="auth-card">
+                <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
 
-                {error && <p style={{ color: 'red' }}>{error}</p>}
+                {error && <div className="auth-error">{error}</div>}
 
                 {isLogin ? (
-                    <form onSubmit={handleLogin} style={styles.form}>
+                    <form onSubmit={handleLogin} className="auth-form">
                         <input
-                            style={styles.input}
+                            className="auth-input"
                             type="text"
                             placeholder="Username"
                             value={username}
@@ -113,50 +130,54 @@ export default function Auth({ onLogin }) {
                             required
                         />
                         <input
-                            style={styles.input}
+                            className="auth-input"
                             type="password"
                             placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
-                        <button type="submit" style={styles.button}>Login</button>
-                        <p>
+
+                        <button type="submit" className="auth-button">Login</button>
+
+                        <div className="auth-footer">
                             Don't have an account?
                             <span
-                                style={styles.link}
-                                onClick={() => setIsLogin(false)}
+                                className="auth-link"
+                                onClick={() => { setIsLogin(false); setError(null); }}
                             > Register</span>
-                        </p>
+                        </div>
                     </form>
                 ) : (
-                    <form onSubmit={handleRegister} style={styles.form}>
+                    <form onSubmit={handleRegister} className="auth-form">
                         <input
-                            style={styles.input}
+                            className="auth-input"
                             type="text"
                             placeholder="Username"
                             value={regUsername}
                             onChange={(e) => setRegUsername(e.target.value)}
                             required
                         />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                            <input
+                                className="auth-input"
+                                type="text"
+                                placeholder="First Name"
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                                required
+                            />
+                            <input
+                                className="auth-input"
+                                type="text"
+                                placeholder="Last Name"
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                                required
+                            />
+                        </div>
                         <input
-                            style={styles.input}
-                            type="text"
-                            placeholder="First Name"
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                            required
-                        />
-                        <input
-                            style={styles.input}
-                            type="text"
-                            placeholder="Last Name"
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-                            required
-                        />
-                        <input
-                            style={styles.input}
+                            className="auth-input"
                             type="number"
                             placeholder="Age"
                             value={age}
@@ -164,7 +185,7 @@ export default function Auth({ onLogin }) {
                             required
                         />
                         <input
-                            style={styles.input}
+                            className="auth-input"
                             type="password"
                             placeholder="Password"
                             value={regPassword}
@@ -172,68 +193,26 @@ export default function Auth({ onLogin }) {
                             required
                         />
                         <input
-                            style={styles.input}
+                            className="auth-input"
                             type="password"
                             placeholder="Retype Password"
                             value={regRetypePassword}
                             onChange={(e) => setRegRetypePassword(e.target.value)}
                             required
                         />
-                        <button type="submit" style={styles.button}>Register</button>
-                        <p>
+
+                        <button type="submit" className="auth-button">Register</button>
+
+                        <div className="auth-footer">
                             Already have an account?
                             <span
-                                style={styles.link}
-                                onClick={() => setIsLogin(true)}
+                                className="auth-link"
+                                onClick={() => { setIsLogin(true); setError(null); }}
                             > Login</span>
-                        </p>
+                        </div>
                     </form>
                 )}
             </div>
         </div>
     );
 }
-
-const styles = {
-    container: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        backgroundColor: '#f0f2f5',
-    },
-    card: {
-        padding: '2rem',
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-        width: '100%',
-        maxWidth: '400px',
-    },
-    form: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
-    },
-    input: {
-        padding: '0.8rem',
-        borderRadius: '4px',
-        border: '1px solid #ddd',
-        fontSize: '1rem',
-    },
-    button: {
-        padding: '0.8rem',
-        backgroundColor: '#1F9E78',
-        color: 'white',
-        border: 'none',
-        borderRadius: '4px',
-        fontSize: '1rem',
-        cursor: 'pointer',
-    },
-    link: {
-        color: '#1F9E78',
-        cursor: 'pointer',
-        fontWeight: 'bold',
-        marginLeft: '5px'
-    }
-};

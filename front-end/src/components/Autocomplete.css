@@ -1,0 +1,73 @@
+/* Autocomplete Container */
+.autocomplete-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+
+
+/* Suggestions Dropdown */
+.suggestions-list {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 250px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.suggestion-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item.active {
+    background-color: #f1f8ff;
+    /* Light blue tint */
+}
+
+.airport-code {
+    font-weight: 700;
+    color: var(--primary-dark);
+    font-size: 0.9rem;
+    background: rgba(46, 204, 113, 0.1);
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.airport-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.airport-city {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+}
+
+.airport-name {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+}

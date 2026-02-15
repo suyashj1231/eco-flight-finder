@@ -1,6 +1,7 @@
 import sys
 from typing import Optional
 import os
+import json
 from pathlib import Path
 
 import logging
@@ -63,6 +64,44 @@ class SearchRequest(BaseModel):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+# --- Airport Suggestion Logic ---
+AIRPORT_DATA = []
+try:
+    with open("airports.json", "r", encoding="utf-8") as f:
+        AIRPORT_DATA = json.load(f)
+    print(f"Loaded {len(AIRPORT_DATA)} airports.")
+except Exception as e:
+    print(f"Failed to load airports.json: {e}")
+
+@app.get("/airports/search")
+def search_airports(q: str):
+    """
+    Search airports by city, name, or IATA code.
+    Results are limited to top 10 matches.
+    """
+    if not q or len(q) < 2:
+        return []
+        
+    term = q.lower()
+    matches = []
+    
+    # Simple direct matching first (could be optimized with trie/search engine)
+    for airport in AIRPORT_DATA:
+        # Check IATA exact match first (priority)
+        if airport.get('iata', '').lower() == term:
+            matches.insert(0, airport)
+            continue
+            
+        # Check text fields
+        text = f"{airport.get('city', '')} {airport.get('name', '')} {airport.get('country', '')} {airport.get('iata', '')}".lower()
+        if term in text:
+            matches.append(airport)
+            
+        if len(matches) >= 10:
+            break
+            
+    return matches
 
 # --- Auth Endpoints ---
 
