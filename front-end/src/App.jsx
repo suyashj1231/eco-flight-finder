@@ -169,7 +169,10 @@ function App() {
           </div>
         </div>
 
-        <SearchForm onSearch={handleSearch} />
+        <SearchForm
+          onSearch={handleSearch}
+          lastSearch={history.length > 0 ? history[0] : null}
+        />
 
         {user && history.length > 0 && (
           <div className="recent-searches">
