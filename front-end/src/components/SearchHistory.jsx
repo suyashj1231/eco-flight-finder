@@ -31,7 +31,9 @@ export default function SearchHistory({ token, onClose, onClear }) {
     };
 
     const formatDate = (dateStr) => {
-        return new Date(dateStr).toLocaleString();
+        return new Date(dateStr).toLocaleString([], {
+            timeZone: 'America/Los_Angeles'
+        });
     };
 
     return (

@@ -27,7 +27,11 @@ export default function Results({ results, resultsPerPage = 8, onBack }) {
   const formatTime = (isoString) => {
     if (!isoString) return "N/A";
     const date = new Date(isoString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'America/Los_Angeles'
+    });
   };
 
   const renderFlightList = (list, page, setPage, title) => {

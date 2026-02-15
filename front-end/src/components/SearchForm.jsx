@@ -41,6 +41,10 @@ export default function SearchForm({ onSearch, lastSearch }) {
     onSearch(formData);
   };
 
+  const today = new Date().toLocaleDateString('en-CA', {
+    timeZone: 'America/Los_Angeles'
+  });
+
   return (
     <form className="input-form" onSubmit={handleSubmit}>
       <div className="top-row">
@@ -66,6 +70,7 @@ export default function SearchForm({ onSearch, lastSearch }) {
           name="departure_date"
           value={formData.departure_date}
           onChange={handleChange}
+          min={today}
           required
         />
         {(formData.is_round_trip || formData.return_date) && (
@@ -75,6 +80,7 @@ export default function SearchForm({ onSearch, lastSearch }) {
             value={formData.return_date}
             onChange={handleChange}
             placeholder="Return Date"
+            min={formData.departure_date || today}
             required={formData.is_round_trip}
           />
         )}
