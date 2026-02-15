@@ -260,36 +260,33 @@ def search_and_recommend_logic(req: SearchRequest):
         if inbound is None:
             raise HTTPException(status_code=500, detail="Flight API error (inbound)")
 
-    # Build composite roundtrip options: pair each outbound with each inbound
-    composites = []
-    if req.return_date and inbound:
-        for out in outbound:
-            for inn in inbound:
-                composites.append({
-                    'outbound': out,
-                    'inbound': inn
-                })
-    else:
-        # Treat each outbound as a single-leg composite (roundtrip assumed same leg)
-        for out in outbound:
-            composites.append(out)
-
+    # Rank outbound
     recommender = FlightRecommender()
-    ranked = recommender.rank_flights(composites, context)
+    ranked_outbound = recommender.rank_flights(outbound, context)
+    
+    ranked_inbound = []
+    if req.return_date and inbound:
+        # Rank inbound
+        ranked_inbound = recommender.rank_flights(inbound, context)
 
-    # Convert to serializable structure
-    output = []
-    for item in ranked:
-        entry = {
-            "filtered_out": item.get("filtered_out", False),
-            "filter_reason": item.get("filter_reason"),
-            "rank_score": item.get("rank_score"),
-            "explanation": item.get("explanation", []),
-            "flight": item.get("flight") or item.get("flight")
-        }
-        output.append(entry)
+    # Convert to serializable structure helper
+    def serialize_results(ranked_list):
+        output = []
+        for item in ranked_list:
+            entry = {
+                "filtered_out": item.get("filtered_out", False),
+                "filter_reason": item.get("filter_reason"),
+                "rank_score": item.get("rank_score"),
+                "explanation": item.get("explanation", []),
+                "flight": item.get("flight")
+            }
+            output.append(entry)
+        return output
 
-    return {"results": output}
+    return {
+        "outbound": serialize_results(ranked_outbound),
+        "inbound": serialize_results(ranked_inbound)
+    }
 
 
 if __name__ == "__main__":

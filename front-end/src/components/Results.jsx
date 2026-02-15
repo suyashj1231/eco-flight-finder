@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Results.css';
 
-export default function Results({ results, resultsPerPage = 8 }) {
+export default function Results({ results, resultsPerPage = 8, onBack }) {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -27,7 +27,11 @@ export default function Results({ results, resultsPerPage = 8 }) {
 
   return (
     <div className="results-container">
-      <h2 className="results-header">Recommended Flights</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <button onClick={onBack} className="btn-back">← Back to Search</button>
+        <h2 className="results-header" style={{ flexGrow: 1, margin: 0 }}>Found {results.length} Flights</h2>
+        <div style={{ width: '130px' }}></div> {/* Spacer for centering */}
+      </div>
       <div>
         {currentResults.map((item, idx) => {
           const flight = item.flight;
