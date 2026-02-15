@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Modal.css';
 
-export default function SearchHistory({ token, onClose }) {
+export default function SearchHistory({ token, onClose, onClear }) {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -65,6 +65,28 @@ export default function SearchHistory({ token, onClose }) {
                 </div>
 
                 <div className="modal-footer">
+                    {history.length > 0 && (
+                        <button
+                            onClick={async () => {
+                                if (window.confirm("Clear all search history?")) {
+                                    try {
+                                        const res = await fetch('/users/history', {
+                                            method: 'DELETE',
+                                            headers: { 'Authorization': `Bearer ${token}` }
+                                        });
+                                        if (res.ok) {
+                                            setHistory([]);
+                                            if (onClear) onClear();
+                                        }
+                                    } catch (e) { console.error(e); }
+                                }
+                            }}
+                            className="btn-danger"
+                            style={{ marginRight: 'auto' }}
+                        >
+                            Clear History
+                        </button>
+                    )}
                     <button onClick={onClose} className="btn-secondary">Close</button>
                     <button className="btn-primary" onClick={fetchHistory}>Refresh</button>
                 </div>

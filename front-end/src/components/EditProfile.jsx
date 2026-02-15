@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './Modal.css';
 
-export default function EditProfile({ user, token, onClose, onUpdate }) {
+export default function EditProfile({ user, token, onClose, onUpdate, onLogout }) {
     const [firstName, setFirstName] = useState(user.first_name || '');
     const [lastName, setLastName] = useState(user.last_name || '');
     const [age, setAge] = useState(user.age || '');
@@ -66,6 +66,63 @@ export default function EditProfile({ user, token, onClose, onUpdate }) {
         }
     };
 
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const handleDeleteAccount = async () => {
+        try {
+            const response = await fetch('/users/me', {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                alert("Account deleted successfully.");
+                if (onLogout) onLogout();
+                onClose();
+            } else {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.detail || 'Delete failed');
+            }
+        } catch (err) {
+            setError(err.message);
+            setShowDeleteConfirm(false);
+        }
+    };
+
+    if (showDeleteConfirm) {
+        return (
+            <div className="modal-overlay">
+                <div className="modal-content" style={{ maxWidth: '400px', textAlign: 'center' }}>
+                    <div className="modal-header" style={{ justifyContent: 'center' }}>
+                        <h3 style={{ color: '#e74c3c' }}>Delete Account?</h3>
+                    </div>
+                    <div className="modal-body">
+                        <p style={{ marginBottom: '20px', color: '#34495e' }}>
+                            Are you sure you want to delete your account? <br />
+                            <strong>This action cannot be undone.</strong>
+                        </p>
+                        <div className="modal-footer" style={{ justifyContent: 'center', gap: '15px' }}>
+                            <button
+                                onClick={handleDeleteAccount}
+                                className="btn-danger"
+                            >
+                                Yes, Delete
+                            </button>
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="btn-secondary"
+                            >
+                                No, Keep Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="modal-overlay">
             <div className="modal-content">
@@ -127,7 +184,7 @@ export default function EditProfile({ user, token, onClose, onUpdate }) {
                             </select>
                         </div>
 
-                        <hr style={{ width: '100%', margin: '10px 0', border: 'none', borderTop: '1px solid #eee' }} />
+                        <hr style={{ width: '100%', margin: '15px 0', border: 'none', borderTop: '1px solid #eee' }} />
 
                         <div>
                             <label>Change Password (Optional):</label>
@@ -148,6 +205,7 @@ export default function EditProfile({ user, token, onClose, onUpdate }) {
                         </div>
 
                         <div className="modal-footer">
+                            <button type="button" onClick={() => setShowDeleteConfirm(true)} className="btn-danger" style={{ marginRight: 'auto' }}>Delete Account</button>
                             <button type="button" onClick={onClose} className="btn-secondary">Close</button>
                             <button type="submit" className="btn-primary">Save Changes</button>
                         </div>

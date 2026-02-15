@@ -177,6 +177,22 @@ def update_user_me(user_update: schemas.UserUpdate, current_user: models.User = 
     db.refresh(current_user)
     return current_user
 
+@app.delete("/users/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_me(current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
+    # Delete search history first (if not cascading)
+    db.query(models.SearchHistory).filter(models.SearchHistory.user_id == current_user.id).delete()
+    
+    # Delete user
+    db.delete(current_user)
+    db.commit()
+    return None
+
+@app.delete("/users/history", status_code=status.HTTP_204_NO_CONTENT)
+def clear_search_history(current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
+    db.query(models.SearchHistory).filter(models.SearchHistory.user_id == current_user.id).delete()
+    db.commit()
+    return None
+
 @app.get("/users/history", response_model=list[schemas.SearchHistory])
 def read_search_history(current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
     return current_user.searches

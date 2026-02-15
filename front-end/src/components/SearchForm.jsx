@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Autocomplete from './Autocomplete.jsx';
 import '../InputField.css';
 
-export default function SearchForm({ onSearch }) {
+export default function SearchForm({ onSearch, lastSearch }) {
   const [formData, setFormData] = useState({
     departure: '',
     arrival: '',
@@ -10,6 +10,18 @@ export default function SearchForm({ onSearch }) {
     return_date: '',
     eco_mode: true
   });
+
+  useEffect(() => {
+    if (lastSearch) {
+      setFormData(prev => ({
+        ...prev,
+        departure: lastSearch.departure_iata || '',
+        arrival: lastSearch.arrival_iata || '',
+        departure_date: lastSearch.departure_date || '',
+        return_date: lastSearch.return_date || '',
+      }));
+    }
+  }, [lastSearch]);
 
   const handleChange = (e) => {
     // If Autocomplete sends a custom event, it might not have type/checked
