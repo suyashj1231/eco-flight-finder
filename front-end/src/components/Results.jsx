@@ -34,6 +34,16 @@ export default function Results({ results, resultsPerPage = 8, onBack }) {
     });
   };
 
+  const constructBookingUrl = (flight) => {
+    if (!flight?.dep_iata || !flight?.arr_iata || !flight?.departure) return "#";
+
+    // Using Kayak format: https://www.kayak.com/flights/LAX-SFO/2026-02-16
+    const isoDate = flight.departure.split('T')[0]; // "2026-02-16"
+    const route = `${flight.dep_iata.toUpperCase()}-${flight.arr_iata.toUpperCase()}`;
+
+    return `https://www.kayak.com/flights/${route}/${isoDate}`;
+  };
+
   const renderFlightList = (list, page, setPage, title) => {
     const indexOfLastResult = page * resultsPerPage;
     const indexOfFirstResult = indexOfLastResult - resultsPerPage;
@@ -69,14 +79,15 @@ export default function Results({ results, resultsPerPage = 8, onBack }) {
                       {formatTime(flight?.departure)} - {formatTime(flight?.arrival)}
                     </div>
 
-                    <div>
-                      <span className="detail-label">Duration:</span>
-                      {flight?.duration_hours?.toFixed(1) || 0}h
-                    </div>
-
-                    <div>
-                      <span className="detail-label">Distance:</span>
-                      {flight?.distance_km?.toFixed(0) || 0} km
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                      <div>
+                        <span className="detail-label">Duration:</span>
+                        {flight?.duration_hours?.toFixed(1) || 0}h
+                      </div>
+                      <div>
+                        <span className="detail-label">Distance:</span>
+                        {flight?.distance_km?.toFixed(0) || 0} km
+                      </div>
                     </div>
                   </div>
 
@@ -85,6 +96,15 @@ export default function Results({ results, resultsPerPage = 8, onBack }) {
                       Reason: {item.filter_reason}
                     </div>
                   )}
+
+                  <a
+                    href={constructBookingUrl(flight)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="buy-btn"
+                  >
+                    Buy Tickets
+                  </a>
                 </div>
 
                 <div className="emissions-info">

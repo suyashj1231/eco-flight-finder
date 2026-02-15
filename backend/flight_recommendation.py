@@ -266,6 +266,8 @@ class FlightRecommender:
             "emissions_kg": emissions_kg,
             "departure": sched_dep,
             "arrival": sched_arr,
+            "dep_iata": get_val(flight, "departure", "iata"),
+            "arr_iata": get_val(flight, "arrival", "iata"),
         }
 
     def _normalize_and_rank(self, flight: Dict, context: SearchContext) -> tuple:

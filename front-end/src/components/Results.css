@@ -186,3 +186,36 @@
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
 }
+
+/* Buy Button */
+.buy-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 24px;
+    background: #27ae60;
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+}
+
+.buy-btn:hover {
+    background: #2ecc71;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(46, 204, 113, 0.3);
+}
+
+.buy-btn:active {
+    transform: translateY(0);
+}
+
+.filtered-out .buy-btn {
+    background: #95a5a6;
+    pointer-events: none;
+    opacity: 0.7;
+    box-shadow: none;
+}
