@@ -80,3 +80,47 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Options Row */
+.options-row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    margin-top: 5px;
+    flex-wrap: wrap;
+}
+
+/* Checkbox Labels */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-dark);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    user-select: none;
+}
+
+.checkbox-label input {
+    width: 20px !important;
+    height: 20px;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Disabled State */
+.disabled-label {
+    opacity: 0.6;
+    cursor: not-allowed;
+    color: #7f8c8d;
+}
+
+.disabled-label input {
+    cursor: not-allowed;
+}

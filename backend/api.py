@@ -162,6 +162,8 @@ def update_user_me(user_update: schemas.UserUpdate, current_user: models.User = 
         current_user.last_name = user_update.last_name
     if user_update.age is not None:
         current_user.age = user_update.age
+    if user_update.results_per_page is not None:
+        current_user.results_per_page = user_update.results_per_page
         
     if user_update.new_password:
         # Require old password if setting new one

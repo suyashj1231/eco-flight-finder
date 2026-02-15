@@ -65,24 +65,26 @@ export default function SearchForm({ onSearch }) {
         />
       </div>
 
-      <label style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        color: 'var(--text-dark)',
-        cursor: 'pointer',
-        alignSelf: 'flex-start',
-        marginLeft: '5px'
-      }}>
-        <input
-          type="checkbox"
-          name="eco_mode"
-          checked={formData.eco_mode}
-          onChange={handleChange}
-          style={{ width: 'auto', margin: 0 }}
-        />
-        <span>Eco Mode (Prioritize Low CO₂)</span>
-      </label>
+      <div className="options-row">
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            name="eco_mode"
+            checked={formData.eco_mode}
+            onChange={handleChange}
+          />
+          Eco Mode (Prioritize Low CO₂)
+        </label>
+
+        <label className="checkbox-label disabled-label" title="Only direct flights are currently supported">
+          <input
+            type="checkbox"
+            checked={true}
+            disabled
+          />
+          Direct Flights Only
+        </label>
+      </div>
 
       <button type="submit">
         Find Flights

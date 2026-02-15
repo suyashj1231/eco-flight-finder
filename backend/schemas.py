@@ -15,12 +15,14 @@ class UserUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     age: Optional[int] = None
+    results_per_page: Optional[int] = None
     old_password: Optional[str] = None # Required if changing password
     new_password: Optional[str] = None
 
 class User(UserBase):
     id: int
     is_active: bool
+    results_per_page: int = 8
     
     class Config:
         from_attributes = True

@@ -201,7 +201,7 @@ function App() {
 
         {loading && <p className="loading-msg">Searching flights... This might take a moment.</p>}
         {error && <div className="error-msg"><strong>Error:</strong> {error}</div>}
-        {!loading && !error && results.length > 0 && <Results results={results} />}
+        {!loading && !error && results.length > 0 && <Results results={results} resultsPerPage={user?.results_per_page || 8} />}
       </div>
     </div>
   )

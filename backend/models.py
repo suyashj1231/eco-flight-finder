@@ -11,6 +11,7 @@ class User(Base):
     first_name = Column(String)
     last_name = Column(String)
     age = Column(Integer)
+    results_per_page = Column(Integer, default=8)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
 

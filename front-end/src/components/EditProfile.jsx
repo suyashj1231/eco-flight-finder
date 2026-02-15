@@ -5,6 +5,7 @@ export default function EditProfile({ user, token, onClose, onUpdate }) {
     const [firstName, setFirstName] = useState(user.first_name || '');
     const [lastName, setLastName] = useState(user.last_name || '');
     const [age, setAge] = useState(user.age || '');
+    const [resultsPerPage, setResultsPerPage] = useState(user.results_per_page || 8);
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [error, setError] = useState(null);
@@ -21,6 +22,9 @@ export default function EditProfile({ user, token, onClose, onUpdate }) {
 
         const numericAge = parseInt(age);
         if (numericAge !== (user.age || 0)) payload.age = numericAge;
+
+        const numericRPP = parseInt(resultsPerPage);
+        if (numericRPP !== (user.results_per_page || 8)) payload.results_per_page = numericRPP;
 
         if (newPassword) {
             if (!oldPassword) {
@@ -107,6 +111,20 @@ export default function EditProfile({ user, token, onClose, onUpdate }) {
                                 value={age}
                                 onChange={(e) => setAge(e.target.value)}
                             />
+                        </div>
+
+                        <div>
+                            <label>Results Per Page:</label>
+                            <select
+                                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}
+                                value={resultsPerPage}
+                                onChange={(e) => setResultsPerPage(e.target.value)}
+                            >
+                                <option value="8">8</option>
+                                <option value="16">16</option>
+                                <option value="24">24</option>
+                                <option value="32">32</option>
+                            </select>
                         </div>
 
                         <hr style={{ width: '100%', margin: '10px 0', border: 'none', borderTop: '1px solid #eee' }} />

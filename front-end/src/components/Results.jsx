@@ -1,9 +1,23 @@
+import { useState, useEffect } from 'react';
 import './Results.css';
 
-export default function Results({ results }) {
+export default function Results({ results, resultsPerPage = 8 }) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [results]);
+
   if (!results || results.length === 0) {
     return <div className="results-container" style={{ textAlign: "center", fontStyle: "italic", marginTop: "20px" }}>No results found.</div>;
   }
+
+  const indexOfLastResult = currentPage * resultsPerPage;
+  const indexOfFirstResult = indexOfLastResult - resultsPerPage;
+  const currentResults = results.slice(indexOfFirstResult, indexOfLastResult);
+  const totalPages = Math.ceil(results.length / resultsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const formatTime = (isoString) => {
     if (!isoString) return "N/A";
@@ -15,7 +29,7 @@ export default function Results({ results }) {
     <div className="results-container">
       <h2 className="results-header">Recommended Flights</h2>
       <div>
-        {results.map((item, idx) => {
+        {currentResults.map((item, idx) => {
           const flight = item.flight;
           const isHighEmissions = flight?.emissions_kg >= 300;
 
@@ -63,6 +77,28 @@ export default function Results({ results }) {
           );
         })}
       </div>
+
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="page-btn"
+          >
+            Prev
+          </button>
+          <span className="page-info">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="page-btn"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }
