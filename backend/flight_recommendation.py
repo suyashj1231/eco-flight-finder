@@ -292,8 +292,13 @@ class FlightRecommender:
         norm_emissions = min(1.0, emissions / ref_emissions) if ref_emissions else 0
         norm_duration = min(1.0, duration / ref_duration) if ref_duration else 0
 
-        # Rank score: weighted combination
-        rank_score = 0.9 * norm_emissions + 0.1 * norm_duration
+        # Rank score: weighted combination based on Eco Mode
+        if context.eco_mode:
+            # 90% emissions, 10% duration
+            rank_score = 0.9 * norm_emissions + 0.1 * norm_duration
+        else:
+            # 20% emissions, 80% duration (Prioritize speed)
+            rank_score = 0.2 * norm_emissions + 0.8 * norm_duration
 
         # Build explanation
         if emissions > 0:
