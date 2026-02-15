@@ -8,7 +8,6 @@ export default function SearchForm({ onSearch, lastSearch }) {
     arrival: '',
     departure_date: '',
     return_date: '',
-    eco_mode: true
   });
 
   useEffect(() => {
@@ -87,16 +86,6 @@ export default function SearchForm({ onSearch, lastSearch }) {
       </div>
 
       <div className="options-row">
-        <label className="checkbox-label">
-          <input
-            type="checkbox"
-            name="eco_mode"
-            checked={formData.eco_mode}
-            onChange={handleChange}
-          />
-          Eco Mode (Prioritize Low CO₂)
-        </label>
-
         <label className="checkbox-label">
           <input
             type="checkbox"

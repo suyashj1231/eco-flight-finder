@@ -17,6 +17,8 @@ function App() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [sortBy, setSortBy] = useState('emissions');
+  const [lastSearchParams, setLastSearchParams] = useState(null);
 
   const handleLogin = async (accessToken) => {
     setToken(accessToken);
@@ -58,20 +60,19 @@ function App() {
     setShowMenu(false);
   };
 
-  const handleSearch = async (formData) => {
+  const handleSearch = async (formData, sortOverride = null) => {
     setLoading(true);
     setError(null);
     setResults([]);
+    setLastSearchParams(formData);
 
     try {
-      // Map SearchForm data to backend API expectation
       const payload = {
         departure_iata: formData.departure,
         arrival_iata: formData.arrival,
         departure_date: formData.departure_date,
-        return_date: formData.return_date || null, // Ensure null if empty string
-        eco_mode: formData.eco_mode,
-        sort_by: "emissions" // Default sort
+        return_date: formData.return_date || null,
+        sort_by: sortOverride || sortBy
       };
 
       // Use authenticated endpoint if token exists
@@ -217,6 +218,8 @@ function App() {
             results={results}
             resultsPerPage={user?.results_per_page || 8}
             onBack={() => setResults([])}
+            sortBy={sortBy}
+            onSortChange={(newSort) => setSortBy(newSort)}
           />
         }
       </div>

@@ -96,8 +96,25 @@ class FlightRecommender:
             score_result = self.calculate_flight_score(flight, context, emissions_cache)
             scored.append(score_result)
 
-        # Sort by rank_score (lower is better)
-        ranked = sorted(scored, key=lambda x: x["rank_score"] if not x.get("filtered_out") else float('inf'))
+        # 6. Sort based on user preference
+        def get_sort_key(item):
+            if item.get("filtered_out"):
+                return (1, float('inf'))
+            
+            flight = item.get("flight", {})
+            sb = context.sort_by
+            
+            if sb == SortBy.DURATION:
+                return (0, flight.get("duration_hours", 0))
+            elif sb == SortBy.DEPARTURE_TIME:
+                return (0, flight.get("departure", ""))
+            elif sb == SortBy.EMISSIONS:
+                return (0, flight.get("emissions_kg", 0))
+            else:
+                # Default to rank_score (can be balanced)
+                return (0, item.get("rank_score", 0))
+
+        ranked = sorted(scored, key=get_sort_key)
 
         return ranked
 
@@ -292,13 +309,9 @@ class FlightRecommender:
         norm_emissions = min(1.0, emissions / ref_emissions) if ref_emissions else 0
         norm_duration = min(1.0, duration / ref_duration) if ref_duration else 0
 
-        # Rank score: weighted combination based on Eco Mode
-        if context.eco_mode:
-            # 90% emissions, 10% duration
-            rank_score = 0.9 * norm_emissions + 0.1 * norm_duration
-        else:
-            # 20% emissions, 80% duration (Prioritize speed)
-            rank_score = 0.2 * norm_emissions + 0.8 * norm_duration
+        # Default Rank score: 70% emissions, 30% duration
+        # (A good balance for an eco-focused app until filters are added)
+        rank_score = 0.7 * norm_emissions + 0.3 * norm_duration
 
         # Build explanation
         if emissions > 0:

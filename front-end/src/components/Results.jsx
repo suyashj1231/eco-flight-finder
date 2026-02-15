@@ -1,9 +1,36 @@
 import { useState, useEffect } from 'react';
 import './Results.css';
 
-export default function Results({ results, resultsPerPage = 8, onBack }) {
-  const outboundList = results.outbound || [];
-  const inboundList = results.inbound || [];
+export default function Results({ results, resultsPerPage = 8, onBack, sortBy, onSortChange }) {
+  const [isSortOpen, setIsSortOpen] = useState(false);
+
+  const sortOptions = [
+    { value: 'emissions', label: 'CO₂: Lowest to Highest' },
+    { value: 'duration', label: 'Duration: Low to High' },
+    { value: 'departure_time', label: 'Time: Earlier to Late' }
+  ];
+
+  const currentSortLabel = sortOptions.find(opt => opt.value === sortBy)?.label || 'Sort By';
+
+  const sortList = (list) => {
+    if (!list) return [];
+    return [...list].sort((a, b) => {
+      const fA = a.flight || {};
+      const fB = b.flight || {};
+
+      if (sortBy === 'duration') {
+        return (fA.duration_hours || 0) - (fB.duration_hours || 0);
+      } else if (sortBy === 'departure_time') {
+        return (fA.departure || "").localeCompare(fB.departure || "");
+      } else {
+        // Default to CO2 (emissions)
+        return (fA.emissions_kg || 0) - (fB.emissions_kg || 0);
+      }
+    });
+  };
+
+  const outboundList = sortList(results.outbound);
+  const inboundList = sortList(results.inbound);
 
   const [outboundPage, setOutboundPage] = useState(1);
   const [inboundPage, setInboundPage] = useState(1);
@@ -11,7 +38,14 @@ export default function Results({ results, resultsPerPage = 8, onBack }) {
   useEffect(() => {
     setOutboundPage(1);
     setInboundPage(1);
-  }, [results]);
+  }, [results, sortBy]); // Reset pages on results OR sort change
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClick = () => setIsSortOpen(false);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
 
   if (outboundList.length === 0 && inboundList.length === 0) {
     return (
@@ -145,8 +179,32 @@ export default function Results({ results, resultsPerPage = 8, onBack }) {
 
   return (
     <div className="results-container">
-      <div style={{ marginBottom: '20px' }}>
+      <div className="results-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <button onClick={onBack} className="btn-back">← Back to Search</button>
+
+        <div className="custom-dropdown-container" onClick={(e) => e.stopPropagation()}>
+          <span className="sort-label">Sort By:</span>
+          <div className={`custom-dropdown ${isSortOpen ? 'active' : ''}`} onClick={() => setIsSortOpen(!isSortOpen)}>
+            <div className="dropdown-trigger">
+              <span>{currentSortLabel}</span>
+              <span className="arrow-icon">▼</span>
+            </div>
+
+            {isSortOpen && (
+              <div className="dropdown-menu-list">
+                {sortOptions.map(opt => (
+                  <div
+                    key={opt.value}
+                    className={`dropdown-option ${sortBy === opt.value ? 'selected' : ''}`}
+                    onClick={() => onSortChange(opt.value)}
+                  >
+                    {opt.label}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {outboundList.length > 0 && renderFlightList(outboundList, outboundPage, setOutboundPage, "Outbound Flights")}

@@ -8,6 +8,7 @@ class SortBy(str, Enum):
     PRICE = "price"
     EMISSIONS = "emissions"
     DURATION = "duration"
+    DEPARTURE_TIME = "departure_time"
     ECO_BALANCED = "eco_balanced"
 
 
@@ -18,7 +19,6 @@ class SearchContext:
     arrival_iata: str
     departure_date: str  # YYYY-MM-DD
     return_date: Optional[str] = None  # YYYY-MM-DD for roundtrip
-    eco_mode: bool = True
     seat_class: str = "economy"
     sort_by: SortBy = SortBy.EMISSIONS
     max_price: Optional[float] = None

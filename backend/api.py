@@ -54,7 +54,6 @@ class SearchRequest(BaseModel):
     arrival_iata: str
     departure_date: str
     return_date: Optional[str] = None
-    eco_mode: bool = False
     sort_by: Optional[str] = None
     max_price: Optional[float] = None
     max_emissions: Optional[float] = None
@@ -238,7 +237,6 @@ def search_and_recommend_logic(req: SearchRequest):
         arrival_iata=req.arrival_iata,
         departure_date=req.departure_date,
         return_date=req.return_date,
-        eco_mode=req.eco_mode,
         seat_class="economy",
         max_price=req.max_price,
         max_emissions=req.max_emissions,
