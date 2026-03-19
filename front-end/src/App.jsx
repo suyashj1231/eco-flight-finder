@@ -5,6 +5,7 @@ import Auth from './components/Auth.jsx';
 import EditProfile from './components/EditProfile.jsx';
 import SearchHistory from './components/SearchHistory.jsx';
 import './App.css';
+import logo from './assets/greensky_logo.png';
 
 function App() {
   const [token, setToken] = useState(null);
@@ -138,7 +139,10 @@ function App() {
 
       <div className='my-div'>
         <div className="app-header">
-          <h1 className="app-title">Eco Flight Finder</h1>
+          <div className="logo-container">
+            <img src={logo} alt="GreenSky Logo" className="app-logo" />
+            <h1 className="app-title">GreenSky</h1>
+          </div>
 
           <div style={{ position: 'relative' }}>
             <button
