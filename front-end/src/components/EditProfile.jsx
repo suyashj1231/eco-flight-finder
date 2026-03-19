@@ -167,6 +167,7 @@ export default function EditProfile({ user, token, onClose, onUpdate, onLogout }
                                 style={{ width: '100%' }}
                                 value={age}
                                 onChange={(e) => setAge(e.target.value)}
+                                min="0"
                             />
                         </div>
 

@@ -183,6 +183,7 @@ export default function Auth({ onLogin }) {
                             value={age}
                             onChange={(e) => setAge(e.target.value)}
                             required
+                            min="0"
                         />
                         <input
                             className="auth-input"
